@@ -2,6 +2,50 @@
 #include <cstring>
 #include "cmath"
 
+static void skipWhitespace(char *source, int &i, int endIndex) {
+    for (; i <= endIndex && iswspace(source[i]); i++) {}
+}
+
+static int getStringLiteralLengthAndSkip(char *source, int &i, int endIndex) {
+    if (source[i++] != '"') throw std::invalid_argument("String literal does not start with quotation marks.");
+    int len = 0;
+    for (; i <= endIndex && source[i] != '\"'; i++, len++) {
+        // Allow escaping quotation marks
+        if (source[i] == '\\' && i < endIndex) i++;
+    }
+    if (source[i++] != '\"') throw std::invalid_argument("String literal does not end with quotation marks.");
+    return len;
+}
+
+static void skipJsonValue(char *source, int &i, int endIndex) {
+    if (source[i] == '{' || source[i] == '[') {
+        // Analyze brace pattern
+        char openingBracket = source[i];
+        char closingBracket = openingBracket == '{' ? '}' : ']';
+        i++;
+        int bracketsOpened = 1;
+
+        for(;i <= endIndex && bracketsOpened > 0;i++){
+            if(source[i] == openingBracket) bracketsOpened++;
+            if(source[i] == closingBracket) bracketsOpened--;
+        }
+        skipWhitespace(source, i, endIndex);
+
+    } else {
+        // Skip to the next comma
+        for (; i <= endIndex && source[i] != ','; i++) {}
+    }
+
+}
+
+static bool strcmp(char *a, char *b, int length) {
+    for (int i = 0; i < length; i++) {
+        if (a[i] != b[i]) return false;
+    }
+    return true;
+}
+
+
 struct JsonValue {
     char *rawJson;
     int startIndex;
@@ -86,14 +130,10 @@ struct JsonValue {
 
 };
 
-struct JsonElement {
+struct JsonObject {
     char *rawJson;
     int startIndex;
     int endIndex;
-
-    JsonElement getJsonObject(char *name) {
-        std::cout << startIndex;
-    }
 
     JsonValue getValue(char *name) {
         for (int i = startIndex; i <= endIndex; i++) {
@@ -120,67 +160,59 @@ struct JsonElement {
             if (rawJson[i] != ',' && rawJson[i] != '}')
                 throw std::invalid_argument("Expecting comma after property in JSON");
         }
-        return JsonValue();
+        throw std::invalid_argument("JSON Element does not contain a property with that name"); // I am too lazy to interpolate the name of the property in there, sorry
     }
 
-    JsonElement(char *rawJson) {
+    JsonObject getJsonObject(char *name) {
+        for (int i = startIndex; i <= endIndex; i++) {
+            skipWhitespace(rawJson, i, endIndex);
+
+            int nameStartIndex = i + 1;
+            int nameLength = getStringLiteralLengthAndSkip(rawJson, i, endIndex);
+
+            skipWhitespace(rawJson, i, endIndex);
+            if (rawJson[i++] != ':') throw std::invalid_argument("Expected colon after property name in JSON");
+            skipWhitespace(rawJson, i, endIndex);
+
+            if (strcmp(rawJson + nameStartIndex, name, nameLength)) {
+                JsonObject element(rawJson, i + 1, 0);
+                skipJsonValue(rawJson, i, endIndex);
+                element.endIndex = i - 2;
+                return element;
+            }
+
+            skipJsonValue(rawJson, i, endIndex);
+
+            if (rawJson[i] != ',' && rawJson[i] != '}')
+                throw std::invalid_argument("Expecting comma after property in JSON");
+        }
+        throw std::invalid_argument("JSON Element does not contain a property with that name");
+    }
+
+    JsonObject(char *rawJson) {
         this->rawJson = rawJson;
         startIndex = 0;
         endIndex = strlen(rawJson) - 1;
 
         // Cut out the outer curly braces
         if (rawJson[startIndex++] != '{')
-            throw std::invalid_argument("JSON source does not start with '{'");
+            throw std::invalid_argument("JSON object source does not start with '{'");
         if (rawJson[endIndex--] != '}')
-            throw std::invalid_argument("JSON source does not end with '}'");
+            throw std::invalid_argument("JSON object source does not end with '}'");
     }
 
-private:
-    JsonElement(char *rawJson, int start, int end) {
+    JsonObject(char *rawJson, int start, int end) {
         this->rawJson = rawJson;
         startIndex = start;
         endIndex = end;
-    }
-
-    void skipWhitespace(char *source, int &i, int endIndex) {
-        for (; i <= endIndex && iswspace(source[i]); i++) {}
-    }
-
-    int getStringLiteralLengthAndSkip(char *source, int &i, int endIndex) {
-        if (source[i++] != '"') throw std::invalid_argument("String literal does not start with quotation marks.");
-        int len = 0;
-        for (; i <= endIndex && source[i] != '\"'; i++, len++) {
-            // Allow escaping quotation marks
-            if (source[i] == '\\' && i < endIndex) i++;
-        }
-        if (source[i++] != '\"') throw std::invalid_argument("String literal does not end with quotation marks.");
-        return len;
-    }
-
-    void skipJsonValue(char *source, int &i, int endIndex) {
-        if (source[i] == '{' || source[i] == '[') {
-            // Analyze brace pattern
-
-        } else {
-            // Skip to the next comma
-            for (; i <= endIndex && source[i] != ','; i++) {}
-        }
-
-    }
-
-    static bool strcmp(char *a, char *b, int length) {
-        for (int i = 0; i < length; i++) {
-            if (a[i] != b[i]) return false;
-        }
-        return true;
     }
 };
 
 
 int main() {
-    char *rawJson = (char *) R"({"yeet":16, "yote":-25.2, "huh":truee})";
-    JsonElement element(rawJson);
-    JsonValue val = element.getValue("huh");
-    std::cout << val.asBool() << '\n';
+    char *rawJson = (char *) R"({"sub":{"ro":15, "yay":"heh", "whoop":{"man":false}},"yeet":16, "yote":-25.2, "huh":true})";
+    JsonObject element(rawJson);
+    std::cout << element.getJsonObject("sub").getJsonObject("whoop").getValue("man").asBool() << '\n';
+    std::cout << element.getValue("yote").asDouble() << '\n';
     return 0;
 }
