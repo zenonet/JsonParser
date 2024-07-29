@@ -3,4 +3,12 @@ project(JsonParser)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(JsonParser main.cpp)
+add_executable(JsonParser main.cpp
+        main.h
+        JsonObject.cpp
+        JsonObject.h
+        JsonArray.cpp
+        JsonArray.h
+        JsonValue.cpp
+        JsonValue.h
+        ParsingUtils.cpp)
