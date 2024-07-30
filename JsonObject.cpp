@@ -4,9 +4,9 @@
 
 #include <stdexcept>
 #include <cstring>
-#include "../JsonParserConsumer/libs/JsonObject.h"
-#include "../JsonParserConsumer/libs/JsonValue.h"
-#include "../JsonParserConsumer/libs/JsonArray.h"
+#include "JsonObject.h"
+#include "JsonValue.h"
+#include "JsonArray.h"
 #include "ParsingUtils.cpp"
 
 
@@ -107,5 +107,28 @@ JsonObject::JsonObject(char *rawJson, int start, int end) {
     this->rawJson = rawJson;
     startIndex = start;
     endIndex = end;
+}
+
+bool JsonObject::has(char *propertyName) {
+    for (int i = startIndex; i <= endIndex; i++) {
+        skipWhitespace(rawJson, i, endIndex);
+
+        int nameStartIndex = i + 1;
+        int nameLength = getStringLiteralLengthAndSkip(rawJson, i, endIndex);
+
+        skipWhitespace(rawJson, i, endIndex);
+        if (rawJson[i++] != ':') throw std::invalid_argument("Expected colon after property name in JSON");
+        skipWhitespace(rawJson, i, endIndex);
+
+        if (strcmp(rawJson + nameStartIndex, propertyName, nameLength)) {
+            return true;
+        }
+
+        skipJsonValue(rawJson, i, endIndex);
+
+        if (rawJson[i] != ',' && rawJson[i] != '}')
+            throw std::invalid_argument("Expecting comma after property in JSON");
+    }
+    return false;
 }
 

@@ -4,9 +4,9 @@
 
 #include <stdexcept>
 #include <cstring>
-#include "../JsonParserConsumer/libs/JsonArray.h"
-#include "../JsonParserConsumer/libs/JsonObject.h"
-#include "../JsonParserConsumer/libs/JsonValue.h"
+#include "JsonArray.h"
+#include "JsonObject.h"
+#include "JsonValue.h"
 #include "ParsingUtils.cpp"
 
 JsonValue JsonArray::getValue(int index) {
@@ -89,4 +89,16 @@ JsonArray::JsonArray(char *rawJson, int start, int end) {
     this->rawJson = rawJson;
     startIndex = start;
     endIndex = end;
+}
+
+int JsonArray::count() {
+    int count = 0;
+    for (int i = startIndex; i <= endIndex; i++) {
+        skipWhitespace(rawJson, i, endIndex);
+        skipJsonValue(rawJson, i, endIndex);
+        count++;
+        if (rawJson[i] != ',' && rawJson[i] != ']')
+            throw std::invalid_argument("Expecting comma after array element in JSON.");
+    }
+    return count;
 }
