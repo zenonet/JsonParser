@@ -17,9 +17,9 @@ struct JsonArray {
     int startIndex;
     int endIndex;
 
-    JsonObject *getJsonObject(int index);
+    JsonObject getJsonObject(int index);
 
-    JsonArray *getJsonArray(int index);
+    JsonArray getJsonArray(int index);
 
     JsonValue getValue(int index);
 };

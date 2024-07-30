@@ -4,9 +4,9 @@
 
 #include <stdexcept>
 #include <cstring>
-#include "JsonObject.h"
-#include "JsonValue.h"
-#include "JsonArray.h"
+#include "../JsonParserConsumer/libs/JsonObject.h"
+#include "../JsonParserConsumer/libs/JsonValue.h"
+#include "../JsonParserConsumer/libs/JsonArray.h"
 #include "ParsingUtils.cpp"
 
 
@@ -39,7 +39,7 @@ JsonValue JsonObject::getValue(char *name) {
             "JSON Element does not contain a property with that name"); // I am too lazy to interpolate the name of the property in there, sorry
 }
 
-JsonObject* JsonObject::getJsonObject(char *name) {
+JsonObject JsonObject::getJsonObject(char *name) {
     for (int i = startIndex; i <= endIndex; i++) {
         skipWhitespace(rawJson, i, endIndex);
 
@@ -51,9 +51,9 @@ JsonObject* JsonObject::getJsonObject(char *name) {
         skipWhitespace(rawJson, i, endIndex);
 
         if (strcmp(rawJson + nameStartIndex, name, nameLength)) {
-            JsonObject* element = new JsonObject(rawJson, i + 1, 0);
+            JsonObject element(rawJson, i + 1, 0);
             skipJsonValue(rawJson, i, endIndex);
-            element->endIndex = i - 2;
+            element.endIndex = i - 2;
             return element;
         }
 
@@ -65,7 +65,7 @@ JsonObject* JsonObject::getJsonObject(char *name) {
     throw std::invalid_argument("JSON Element does not contain a property with that name");
 }
 
-JsonArray* JsonObject::getJsonArray(char *name) {
+JsonArray JsonObject::getJsonArray(char *name) {
     for (int i = startIndex; i <= endIndex; i++) {
         skipWhitespace(rawJson, i, endIndex);
 
@@ -77,9 +77,9 @@ JsonArray* JsonObject::getJsonArray(char *name) {
         skipWhitespace(rawJson, i, endIndex);
 
         if (strcmp(rawJson + nameStartIndex, name, nameLength)) {
-            JsonArray* array = new JsonArray(rawJson, i + 1, 0);
+            JsonArray array(rawJson, i + 1, 0);
             skipJsonValue(rawJson, i, endIndex);
-            array->endIndex = i - 2;
+            array.endIndex = i - 2;
             return array;
         }
 

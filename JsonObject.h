@@ -21,9 +21,9 @@ struct JsonObject {
 
     JsonValue getValue(char *name);
 
-    JsonObject *getJsonObject(char *name);
+    JsonObject getJsonObject(char *name);
 
-    JsonArray *getJsonArray(char *name);
+    JsonArray getJsonArray(char *name);
 };
 
 #endif //JSONPARSER_JSONOBJECT_H
