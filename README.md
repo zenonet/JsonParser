@@ -44,5 +44,3 @@ std::cout << mainObsession << '\n';
 std::cout << num << '\n';
 ```
 
-## Reference
-
