@@ -5,8 +5,4 @@
 #ifndef JSONPARSER_MAIN_H
 #define JSONPARSER_MAIN_H
 
-struct JsonArray;
-struct JsonObject;
-
-
 #endif //JSONPARSER_MAIN_H

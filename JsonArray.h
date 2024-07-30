@@ -8,6 +8,7 @@
 #include "JsonObject.h"
 #include "JsonValue.h"
 
+struct JsonObject;
 struct JsonArray {
     JsonArray(char *rawJson, int start, int end);
     JsonArray(char *rawJson);
@@ -16,12 +17,11 @@ struct JsonArray {
     int startIndex;
     int endIndex;
 
+    JsonObject *getJsonObject(int index);
+
+    JsonArray *getJsonArray(int index);
+
     JsonValue getValue(int index);
-
-    JsonArray getJsonArray(int index);
-
-    JsonObject getJsonObject(int index);
-
 };
 
 #endif //JSONPARSER_JSONARRAY_H

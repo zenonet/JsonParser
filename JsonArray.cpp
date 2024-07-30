@@ -33,15 +33,15 @@ JsonValue JsonArray::getValue(int index) {
     throw std::invalid_argument("JSON Element does not contain a property with that name"); // I am too lazy to interpolate the name of the property in there, sorry
 }
 
-JsonObject JsonArray::getJsonObject(int index) {
+JsonObject* JsonArray::getJsonObject(int index) {
     int currentIndex = 0;
     for (int i = startIndex; i <= endIndex; i++) {
         skipWhitespace(rawJson, i, endIndex);
 
         if (currentIndex == index) {
-            JsonObject object(rawJson, i + 1, 0);
+            JsonObject* object = new JsonObject(rawJson, i + 1, 0);
             skipJsonValue(rawJson, i, endIndex);
-            object.endIndex = i - 2;
+            object->endIndex = i - 2;
             return object;
         }
 
@@ -53,15 +53,15 @@ JsonObject JsonArray::getJsonObject(int index) {
     throw std::invalid_argument("Index out of bounds in JSON array.");
 }
 
-JsonArray JsonArray::getJsonArray(int index) {
+JsonArray* JsonArray::getJsonArray(int index) {
     int currentIndex = 0;
     for (int i = startIndex; i <= endIndex; i++) {
         skipWhitespace(rawJson, i, endIndex);
 
         if (currentIndex == index) {
-            JsonArray array(rawJson, i + 1, 0);
+            JsonArray* array = new JsonArray(rawJson, i + 1, 0);
             skipJsonValue(rawJson, i, endIndex);
-            array.endIndex = i - 2;
+            array->endIndex = i - 2;
             return array;
         }
 
