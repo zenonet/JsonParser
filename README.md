@@ -10,6 +10,10 @@ The library contains three main header files:
 and their respective .cpp source files.
 Additionally, the source files need to access shared functions in `ParsingUtils.cpp`.
 
+![1000018606](https://github.com/user-attachments/assets/0f18e07d-709b-4bd8-817b-c17e4f092e61)
+![1000018607](https://github.com/user-attachments/assets/8dbe3fa3-0906-4ebd-90e1-85268c8a0b14)
+
+
 ## Example
 
 You can load a json string by creating a new instance of `JsonObject` like this:
